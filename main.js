@@ -60,7 +60,7 @@ Background.prototype.update = function () {
 function IceChancellor(game, spritesheet) {
     this.animation = new Animation(spritesheet, 64, 64, 4, 0.10, 32, true, 2);
     this.x = 800;
-    this.y = 0;
+    this.y = 450;
     this.speed = -150;
     this.game = game;
     this.ctx = game.ctx;
