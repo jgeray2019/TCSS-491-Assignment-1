@@ -58,12 +58,17 @@ Background.prototype.update = function () {
 };
 
 function IceChancellor(game, spritesheet) {
-    this.animation = new Animation(spritesheet, 64, 64, 4, 0.10, 32, true, 2);
+    this.actions = {left: new Animation(spritesheet[0], 64, 64, 4, 0.08, 16, true, 2),
+            up: new Animation(spritesheet[1], 64, 64, 4, 0.08, 16, true, 2),
+            down: new Animation(spritesheet[2], 64, 64, 4, 0.08, 16, true, 2),
+            death: new Animation(spritesheet[3], 64, 64, 4, 0.08, 16, false, 2)};
+    this.animation = this.actions.left;
     this.x = 800;
     this.y = 450;
     this.speed = -150;
     this.game = game;
     this.ctx = game.ctx;
+    this.demoTime = 0;
 }
 
 IceChancellor.prototype.draw = function () {
@@ -71,14 +76,40 @@ IceChancellor.prototype.draw = function () {
 }
 
 IceChancellor.prototype.update = function () {
-    if (this.animation.elapsedTime < this.animation.totalTime * 8 / 14)
+    this.demoTime += this.game.clockTick;
+    if (this.demoTime < 1.5) {
+        this.animation = this.actions.left;
         this.x += this.game.clockTick * this.speed;
-    if (this.x < -230) this.x = 800;
+    } else if (this.demoTime > 1.5 && this.demoTime < 3) {
+        this.animation = this.actions.up;
+        this.y += this.game.clockTick * this.speed / 1.5;
+    } else if (this.demoTime > 3 && this.demoTime < 4.5) {
+        this.animation = this.actions.left;
+        this.x += this.game.clockTick * this.speed;
+    } else if (this.demoTime > 4.5 && this.demoTime < 6) {
+        this.animation = this.actions.down;
+        this.y += this.game.clockTick * this.speed / 1.5 * -1;
+    } else if (this.demoTime > 6 && this.demoTime < 7.5) {
+        this.animation = this.actions.left;
+        this.x += this.game.clockTick * this.speed;
+    } else if (this.demoTime > 7.5 && this.demoTime < 9) {
+        this.animation = this.actions.death;
+    } else {
+        this.x += this.game.clockTick * this.speed;
+    }
+    if (this.x < -230) {
+        this.actions.death.elapsedTime = 0;
+        this.demoTime = 0;
+        this.x = 800;
+    }
 }
 
 
 AM.queueDownload("./img/background.jpg");
-AM.queueDownload("./img/icechancellor.png");
+AM.queueDownload("./img/wizardup.png");
+AM.queueDownload("./img/wizardleft.png");
+AM.queueDownload("./img/wizarddown.png");
+AM.queueDownload("./img/wizarddeath.png");
 
 AM.downloadAll(function () {
     var canvas = document.getElementById("gameWorld");
@@ -89,7 +120,11 @@ AM.downloadAll(function () {
     gameEngine.start();
 
     gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/background.jpg")));
-    gameEngine.addEntity(new IceChancellor(gameEngine, AM.getAsset("./img/icechancellor.png")));
+    gameEngine.addEntity(new IceChancellor(gameEngine, 
+        [ AM.getAsset("./img/wizardleft.png"), 
+        AM.getAsset("./img/wizardup.png"),
+        AM.getAsset("./img/wizarddown.png"), 
+        AM.getAsset("./img/wizarddeath.png") ]));
     
     console.log("All Done!");
 });
